@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package>
+  <name>testit_patrol_learn</name>
+  <version>0.0.0</version>
+  <description>Scalable Long-Term Autonomy Testing toolkit tutorials</description>
+
+  <maintainer email="ingmar@liibert.ee">Marti Ingmar Liibert</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://wiki.ros.org/testit</url>
+  <url type="bugtracker">https://github.com/ingmarliibert/testit/issues</url>
+  <url type="repository">https://github.com/ingmarliibert/testit</url>
+
+
+  <author email="ingmar@liibert.ee">Marti Ingmar Liibert</author>
+
+  <build_depend>testit</build_depend>
+  <build_depend>testit_oracles</build_depend>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>testit</run_depend>
+  <run_depend>testit_oracles</run_depend>
+  
+  <run_depend>rospy</run_depend>
+</package>

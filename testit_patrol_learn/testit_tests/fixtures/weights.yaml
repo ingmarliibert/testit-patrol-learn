@@ -1,0 +1,7 @@
+weights:
+  - type: 'coverage'
+    name: 'unknown_object_detector.py'
+    weight: 10.0
+  - type: 'coverage'
+    name: 'patrol_planner_patched.py'
+    weight: 5.0

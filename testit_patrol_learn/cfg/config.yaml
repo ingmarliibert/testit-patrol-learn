@@ -1,0 +1,208 @@
+jobs:
+  - tag: "T1"
+    mode: "explore"
+    concurrency: 1
+    credits: 1
+    pipeline: "" # empty for any
+    verbose: False # set to True for more verbose information
+    moveStrategyService: "" # custom move strategy possible, must implement testit_explorer.MoveStrategy.srv, "" for default
+    moveStrategyInitTopic: "" # custom move strategy possible, init values are sent to this topic, MoveStrategyInit.msg, "" for default, stateMachine empty for explore mode
+    loggerConfiguration: "testit_tests/fixtures/logger.yaml"
+    launch: "(rostopic pub -l /robot_1/enable std_msgs/Bool \"data: true\" &); (rostopic pub -l /robot_2/enable std_msgs/Bool \"data: true\" &)" # how to execute this test (run command) in TestIt container, if empty, then assumed that test is not explicitly executed (already started at runSUT and oracle is used to determine pass/fail)
+    oracle: ""
+    timeout: 86400 # time in seconds for timeout (0 for no timeout)
+    timeoutVerdict: False # if timeout occurs, declare the test as this (False = fail, True = success)
+    postCommand: "echo 'Explore finished!'" # it is possible to execute shell commands after running the test
+    bagEnabled: False
+    bagMaxSplits: "" # empty = use default
+    bagDuration: "" # empty = use default
+
+  - tag: "L1" # identifier for reporting
+    learnBy: "T1" # has to match log entries
+    mode: "learn" # explore | refine-model (if using timeout to end refine-model, make sure the pipeline has enough stopTestItDelay to write new model after timeout) | learn | test (default)
+    plot: True
+    concurrency: 1
+    credits: 1
+    pipeline: "" # empty for any
+    verbose: False # set to True for more verbose information
+    loggerConfiguration: "testit_tests/fixtures/logger.yaml" # define the TestIt logger configuration file  path, w.r.t. 'sharedDirectory' directory (e.g., "testit_tests/fixtures/01/logger.yaml")
+    stateMachineToUppaalService: ""   # custom service path possible (must implement StateMachineToUppaal.srv)
+    logToClusterService: ""           # custom service path possible (must implement LogToCluster.srv)
+    clusterToStateMachineService: ""  # custom service path possible (must implement ClusterToStateMachine.srv)
+    writeUppaalService: ""            # custom service path possible (must implement WriteUppaalModel.srv)
+    launch: ""
+    oracle: "" # determining whether pass/fail, if empty = "launch" execution result will be used to determine pass/fail
+    timeout: 86400 # time in seconds for timeout (0 for no timeout)
+    timeoutVerdict: False # if timeout occurs, declare the test as this (False = fail, True = success)
+    postCommand: "echo 'Learn finished!'" # it is possible to execute shell commands after running the test
+    bagEnabled: False
+    bagMaxSplits: "" # empty = use default
+    bagDuration: "" # empty = use default
+
+  - tag: "R1" # identifier for reporting
+    mode: "refine-model" # explore | refine-model (if using timeout to end refine-model, make sure the pipeline has enough stopTestItDelay to write new model after timeout) | learn | test (default)
+    continuousUpdate: true # default false (writes refined model after every step)
+    concurrency: 1
+    credits: 1
+    pipeline: "" # empty for any
+    verbose: False # set to True for more verbose information
+    moveStrategyService: "" # custom move strategy possible, must implement testit_explorer.MoveStrategy.srv, "" for default, stateMachine given for refining model
+    moveStrategyInitTopic: "" # custom move strategy possible, init values are sent to this topic, MoveStrategyInit.msg, "" for default
+    modelName: "testit_tests/results/T1r0mbsgr0puo"
+    newModelName: "testit_tests/results/R1r0mbsgr0puo"
+    preLaunchCommand: "(cp [[sharedDirectory]][[modelName]].yaml [[sharedDirectory]][[newModelName]]-refined_model.yaml); (cp [[sharedDirectory]][[modelName]]-adapter_config.yaml [[sharedDirectory]][[newModelName]]-refined-adapter_config.yaml); true"
+    loggerConfiguration: "testit_tests/fixtures/logger.yaml" # define the TestIt logger configuration file  path, w.r.t. 'sharedDirectory' directory (e.g., "testit_tests/fixtures/01/logger.yaml")
+    stateMachine: "testit_tests/results/T1r0mbsgr0puo-state_machine.json"
+    stateMachineToUppaalService: ""   # custom service path possible (must implement StateMachineToUppaal.srv)
+    launch: ""
+    oracle: "" # determining whether pass/fail, if empty = "launch" execution result will be used to determine pass/fail
+    timeout: 86400 # time in seconds for timeout (0 for no timeout)
+    timeoutVerdict: False # if timeout occurs, declare the test as this (False = fail, True = success)
+    postCommand: "echo 'Refine model finished!'" # it is possible to execute shell commands after running the test
+    bagEnabled: False
+    bagMaxSplits: "" # empty = use default
+    bagDuration: "" # empty = use default
+
+  - tag: "T2" # identifier for reporting
+    mode: "test" # explore | refine-model (if using timeout to end refine-model, make sure the pipeline has enough stopTestItDelay to write new model after timeout) | learn | test (default)
+    concurrency: 1
+    credits: 1
+    pipeline: "" # empty for any
+    verbose: False # set to True for more verbose information
+    uppaalModel: "testit_tests/results/R1r0mbsgr0puo-refined_model.xml"
+    loggerConfiguration: "testit_tests/fixtures/logger_detection.yaml" # define the TestIt logger configuration file  path, w.r.t. 'sharedDirectory' directory (e.g., "testit_tests/fixtures/01/logger.yaml")
+    adapterConfiguration: "testit_tests/results/R1r0mbsgr0puo-refined-adapter_config.yaml"  # in sharedDirectory
+    adapterLaunch: "launch/testit_adapter.launch"                                           # in sharedDirectory
+    modelConfiguration: "testit_tests/results/R1r0mbsgr0puo-refined_model.yaml"             # in sharedDirectory
+    launch: "(roslaunch testit_dtron_adapter testit_adapter.launch configuration:=\"[[sharedDirectory]][[adapterConfiguration]]\" adapter_launch_file:=\"[[sharedDirectory]][[adapterLaunch]]\" model_configuration:=\"[[sharedDirectory]][[modelConfiguration]]\" &); (sleep 10 && rostopic pub -l /robot_1/enable std_msgs/Bool \"data: true\" &); (sleep 10 && rostopic pub -l /robot_2/enable std_msgs/Bool \"data: true\" &); (sleep 10 && rosrun testit_dtron run_dtron_test.sh [[sharedDirectory]][[uppaalModel]])" # how to execute this test (run command) in TestIt container, if empty, then assumed that test is not explicitly executed (already started at runSUT and oracle is used to determine pass/fail)    oracle: "" # determining whether pass/fail, if empty = "launch" execution result will be used to determine pass/fail
+    oracle: ""
+    timeout: 86400 # time in seconds for timeout (0 for no timeout)
+    timeoutVerdict: False # if timeout occurs, declare the test as this (False = fail, True = success)
+    postCommand: "echo 'Test finished!'" # it is possible to execute shell commands after running the test
+    bagEnabled: False
+    bagMaxSplits: "" # empty = use default
+    bagDuration: "" # empty = use default
+
+  - tag: "T3" # online testing
+    mode: "test"
+    concurrency: 1
+    credits: 1
+    pipeline: "" # empty for any
+    verbose: False # set to True for more verbose information (if no oracle specified, test is run in foreground)
+    loggerConfiguration: "testit_tests/fixtures/logger.yaml"
+    launch: "(rostopic pub -l /robot_1/enable std_msgs/Bool \"data: true\" &); (rostopic pub -l /robot_2/enable std_msgs/Bool \"data: true\" &); rosrun testit testit_runner.py _filename:=/testit/testit_tests/results/persistent/logger_tron_finished.log _weights:=/testit/testit_tests/fixtures/weights.yaml _test:=T2 _selection_mode:=0" # mode=0 best, 1=random, 2=worst
+    oracle: ""
+    timeout: 600 # time in seconds for timeout (0 for no timeout)
+    timeoutVerdict: False # if timeout occurs, declare the test as this (False = fail, True = success)
+    postTestSuccessCommand: "echo 'postTest success command'"
+    postTestFailureCommand: "echo 'postTest failure command'"
+    postTestCommand: "echo 'postTest command; UUID is [[testUuid]]'"
+    postCommand: "echo 'Test finished!'" # it is possible to execute shell commands after running the test
+    bagEnabled: False
+    bagMaxSplits: "" # empty = use default
+    bagDuration: "" # empty = use default
+
+
+configuration:
+  dataDirectory: "$(rospack find testit)/data/" # Where to store coverage files, bag files etc.
+  bringupSUT: "" # how to bring up a pipeline server/docker SUT (general case), you can use "[[]]" for replacing
+  bringupSUTDelay: 0 # duration to wait after command
+  bringupSUTTimeout: 1 # seconds (0 for no timeout, but you have to specify bringup_finish_trigger then or tests will not be run)
+  bringupSUTFinishTrigger: "-" # command to test whether startup is finished, "-" = no trigger
+  runSUT:
+    - "docker run --rm --volume=[[testItVolume]]:[[sharedDirectory]] --env ROS_HOSTNAME=[[masterHost]] --env ROS_MASTER_URI=http://[[masterHost]]:11311 --network host --name [[masterContainerName]] -dt testitros/testit_patrol_sut:spinning /bin/bash -c \"source /catkin_ws/devel/setup.bash && (roscore &); (sleep 2 && rosrun testit_sut testit_service.py _mode:=msg _host:=master _node_workspace:=/catkin_ws _coverage_directories:=/catkin_ws/build\\;/root/.ros &); (sleep 4 && roslaunch robots_stage stage.launch world_file:=/catkin_ws/src/robots_stage/maps/4th_floor/4th_floor.world map_file:=/catkin_ws/src/robots_stage/maps/4th_floor/4th_floor.yaml &); (sleep 4 && rosparam load /catkin_ws/src/testit-patrol-sut/patrol_planner/cfg/map.yaml /patrol_planner) && tail -f /dev/null\"" # run SUT (ROS Master)
+    - "docker run --rm --volume=[[testItVolume]]:[[sharedDirectory]] --env ROS_HOSTNAME=[[sutHost1]] --env ROS_MASTER_URI=http://[[masterHost]]:11311 --network host --name sut1 -dt testitros/testit_patrol_sut:spinning /bin/bash -c \"source /catkin_ws/devel/setup.bash && (sleep 5 && roslaunch robots_stage navigation.launch name:=robot_0 initial_pose_x:=2 initial_pose_y:=36 initial_pose_a:=0.0 &); (sleep 20 && roslaunch patrol_unknown_object planter_single_robot.launch name:=robot_0 &); (sleep 10 && rostopic pub -1 /robot_0/initialpose geometry_msgs/PoseWithCovarianceStamped \\\"{header: {seq: 0, stamp: {secs: 0, nsecs: 0}, frame_id: map}, pose: {pose: {position: {x: 2, y: 36, z: 0.0}, orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}, covariance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}}\\\") && tail -f /dev/null\"" # run SUT (Host 1, Intruder)
+    - "docker run --rm --volume=[[testItVolume]]:[[sharedDirectory]] --env ROS_HOSTNAME=[[sutHost2]] --env ROS_MASTER_URI=http://[[masterHost]]:11311 --network host --name sut2 -dt testitros/testit_patrol_sut:spinning /bin/bash -c \"source /catkin_ws/devel/setup.bash && (sleep 2 && rosrun testit_sut testit_service.py _mode:=msg _host:=robot_1 _node_workspace:=/catkin_ws _coverage_directories:=/catkin_ws/build\\;/root/.ros &); (sleep 5 && roslaunch robots_stage navigation.launch name:=robot_1 initial_pose_x:=10.33 initial_pose_y:=15.43 initial_pose_a:=0.0 &); (sleep 20 && roslaunch patrol_unknown_object detector_single_robot.launch name:=robot_1 &); (sleep 20 && roslaunch patrol_planner single_robot.launch name:=robot_1 &); (sleep 10 && rostopic pub -1 /robot_1/initialpose geometry_msgs/PoseWithCovarianceStamped \\\"{header: {seq: 0, stamp: {secs: 0, nsecs: 0}, frame_id: map}, pose: {pose: {position: {x: 10.33, y: 15.43, z: 0.0}, orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}, covariance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}}\\\") && tail -f /dev/null\"" # run SUT (Host 2)
+    - "docker run --rm --volume=[[testItVolume]]:[[sharedDirectory]] --env ROS_HOSTNAME=[[sutHost3]] --env ROS_MASTER_URI=http://[[masterHost]]:11311 --network host --name sut3 -dt testitros/testit_patrol_sut:spinning /bin/bash -c \"source /catkin_ws/devel/setup.bash && (sleep 2 && rosrun testit_sut testit_service.py _mode:=msg _host:=robot_2 _node_workspace:=/catkin_ws _coverage_directories:=/catkin_ws/build\\;/root/.ros &); (sleep 5 && roslaunch robots_stage navigation.launch name:=robot_2 initial_pose_x:=34.2 initial_pose_y:=24.79 initial_pose_a:=0.0 &); (sleep 20 && roslaunch patrol_unknown_object detector_single_robot.launch name:=robot_2 &); (sleep 20 && roslaunch patrol_planner single_robot.launch name:=robot_2 &); (sleep 10 && rostopic pub -1 /robot_2/initialpose geometry_msgs/PoseWithCovarianceStamped \\\"{header: {seq: 0, stamp: {secs: 0, nsecs: 0}, frame_id: map}, pose: {pose: {position: {x: 34.3, y: 24.79, z: 0.0}, orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}, covariance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}}\\\") && tail -f /dev/null\"" # run SUT (Host 3)
+  runSUTDelay:
+    - 10
+    - 10
+    - 10
+    - 10
+  runSUTTimeout: 0
+  runSUTFinishTrigger: "-"
+  stopSUT:
+    - "docker kill [[masterContainerName]]"
+    - "docker kill sut1"
+    - "docker kill sut2"
+    - "docker kill sut3"
+  stopSUTDelay: 0 # duration to wait after stopping the SUT
+  stopSUTTimeout: 0
+  stopSUTFinishTrigger: "-"
+  teardownSUT: "" # how to clean up after finishing (shut down server/docker) (general case)
+  teardownSUTDelay: 0 # duration to wait after teardown
+  teardownSUTTimeout: 0
+  teardownSUTFinishTrigger: "-"
+  bringupTestIt: "" # bring up the pipeline server (in the cloud for example)
+  bringupTestItDelay: 0 # duration to wait after command
+  bringupTestItTimeout: 1
+  bringupTestItFinishTrigger: "-"
+  runTestIt: "docker run --rm --volume=[[testItVolume]]:[[sharedDirectory]] --network host --env ROS_HOSTNAME=[[testItHost]] --env ROS_MASTER_URI=http://[[masterHost]]:11311 --name [[testItContainerName]] -dt testitros/testit_patrol_testit:learn /bin/bash -c \"(pkill spread && sleep 5); (/catkin_ws/spread/sbin/spread -c [[sharedDirectory]]cfg/spread.conf &) && tail -f /dev/null\"" # how to bring up a pipeline TestIt (general case), you can use "[[]]" for replacing
+  runTestItDelay: 10 # duration to wait after command
+  runTestItTimeout: 10
+  runTestItFinishTrigger: ""
+  stopTestIt: "docker kill [[testItContainerName]]" # general case pipeline stopping
+  stopTestItDelay: 10 # duration to wait after command
+  stopTestItTimeout: 5
+  stopTestItFinishTrigger: "-"
+  teardownTestIt: ""
+  teardownTestItDelay: 0 # duration to wait after command
+  teardownTestItTimeout: 5 # empty string = use default
+  teardownTestItFinishTrigger: "-" # command to test whether startup is finished, "-" = no trigger
+  bagEnabled: True # True=rosbag record, False=don't bag
+  bagMaxSplits: 2 # total bag duration = maxsplits*duration
+  bagDuration: 10 # seconds
+
+pipelines:
+  - tag: "Pipeline #1" # identifier for reporting
+    identityFile: "-" # "-" means none. If you need to specify the identity file for SSH/SCP, e.g., "~/.ssh/testit_rsa" means that this will be prepended to SSH/SCP commands like this "-i ~/.ssh/testit_rsa user@pipe1.domain.com".
+    sutConnection:
+      - "-"
+      - "-"
+      - "-"
+      - "-"
+    testItConnection: "-" # see above
+    masterHost: "sut_host"
+    masterContainerName: "master_container"
+    sutHost1: "sut_host"
+    sutHost2: "sut_host"
+    sutHost3: "sut_host"
+    testItHost: "testit_host"
+    testItContainerName: "testit_container"
+    masterIP: "-" # where SUT roscore is running (used if masterHost is not defined) ("-" means none)
+    testItIP: "-" # where TestIt docker container is running (used if testitHost is not defined) ("-" means none)
+    testItVolume: "$(rospack find testit_patrol_learn)/" # where TestIt volume is located (test scenarios + bags are stored there) at the [[testItConnection]] host.
+    sharedDirectory: "/testit/" # shared volume for TestIt docker container (shared files with host)
+    resultsDirectory: "testit_tests/results/" # where to store results inside TestIt docker w.r.t. sharedDirectory (i.e., sharedDirectory="/testit/" and resultsDirectory="testit_tests/results/" => results will be stored in "/testit/testit_tests/results")
+    bringupSUT: "" # empty string = use default
+    bringupSUTDelay: ""
+    bringupSUTTimeout: "" # empty string = use default
+    bringupSUTFinishTrigger: "" # empty string = use default
+    runSUT: "" # empty string = use default
+    runSUTDelay: ""
+    runSUTTimeout: ""
+    runSUTFinishTrigger: ""
+    stopSUT: ""
+    stopSUTDelay: ""
+    stopSUTTimeout: ""
+    stopSUTFinishTrigger: ""
+    teardownSUT: "" # custom teardown for this pipeline
+    teardownSUTDelay: ""
+    teardownSUTTimeout: "" # empty string = use default
+    teardownSUTFinishTrigger: "" # empty string = use default
+    bringupTestIt: "" # empty string = use default
+    bringupTestItDelay: ""
+    bringupTestItTimeout: "" # empty string = use default
+    bringupTestItFinishTrigger: "" # empty string = use default
+    runTestIt: "" # empty string = use default
+    runTestItDelay: ""
+    runTestItTimeout: ""
+    runTestItFinishTrigger: ""
+    stopTestIt: ""
+    stopTestItDelay: ""
+    stopTestItTimeout: ""
+    stopTestItFinishTrigger: ""
+    teardownTestIt: "" # custom teardown for this pipeline
+    teardownTestItDelay: "" # duration to wait after command
+    teardownTestItTimeout: "" # empty string = use default
+    teardownTestItFinishTrigger: "" # empty string = use default

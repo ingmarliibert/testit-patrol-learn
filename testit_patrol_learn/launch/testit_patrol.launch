@@ -1,0 +1,6 @@
+<launch>
+  <arg name="config" default="$(find testit_patrol)/cfg/config.yaml"/>
+  <include file="$(find testit)/launch/testit.launch">
+      <arg name="config" value="$(arg config)"/>
+  </include>
+</launch>

@@ -1,0 +1,21 @@
+configuration:
+  coverage:
+    enable: True # If True, then logs coverage info
+    mode: "msg" # topic mode (sends message to /testit/flush_coverage to get coverage data from hosts)
+    reportingTimeLimit: 2.0 # reporting time allocation
+
+  inputs: # SUT inputs (e.g., commands to SUT), triggers log entry
+    - identifier: "/robot_1/sees_unknown_object" # topic/service proxy name (with full namespace, i.e., "/robot/odom")
+      proxy: "" # advertised proxy service name (reroutes the service to "identifier" service); if empty (""), "topic"-mode is assumed
+      type: "std_msgs.msg.Bool" # topic/service proxy as string (e.g., "std_srvs.srv.Int32"); supports services ("srv"), topics ("msg") and actions ("Action")
+      timeout: 120 # maximum time in seconds to wait for feedback
+
+    - identifier: "/robot_2/sees_unknown_object" # topic/service proxy name (with full namespace, i.e., "/robot/odom")
+      proxy: "" # advertised proxy service name (reroutes the service to "identifier" service); if empty (""), "topic"-mode is assumed
+      type: "std_msgs.msg.Bool" # topic/service proxy as string (e.g., "std_srvs.srv.Int32"); supports services ("srv"), topics ("msg") and actions ("Action")
+      timeout: 120 # maximum time in seconds to wait for feedback
+
+    - identifier: "/robot_0/plant_unknown_object" # topic/service proxy name (with full namespace, i.e., "/robot/odom")
+      proxy: "" # advertised proxy service name (reroutes the service to "identifier" service); if empty (""), "topic"-mode is assumed
+      type: "std_msgs.msg.Bool" # topic/service proxy as string (e.g., "std_srvs.srv.Int32"); supports services ("srv"), topics ("msg") and actions ("Action")
+      timeout: 120 # maximum time in seconds to wait for feedback

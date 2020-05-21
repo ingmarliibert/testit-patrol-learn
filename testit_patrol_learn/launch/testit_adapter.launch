@@ -1,0 +1,5 @@
+<launch>
+  <!-- THIS FILE IS LAUNCHED INSIDE THE TESTIT DOCKER CONTAINER -->
+  <!-- (adapters are launched inside TestIt containers) -->
+  <node name="test_adapter_1"  pkg="testit_dtron_adapter" type="test_adapter" args="r0mbsgr0puo" />
+</launch>
